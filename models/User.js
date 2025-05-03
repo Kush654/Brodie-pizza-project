@@ -1,8 +1,24 @@
+/**
+ * User Model
+ * 
+ * Handles all user-related database operations including:
+ * - User authentication (registration, login)
+ * - Profile management (update, change password)
+ * - User retrieval and deletion
+ * 
+ * Uses bcrypt for secure password hashing and verification.
+ */
+
 import bcrypt from 'bcrypt';
 import { getDbConnection } from '../config/database.js';
 
 class User {
-  // Get user by id
+  /**
+   * Find a user by their ID
+   * 
+   * @param {number} id - The user ID to search for
+   * @returns {Promise<Object|null>} User object if found, null otherwise
+   */
   static async findById(id) {
     return new Promise((resolve, reject) => {
       const db = getDbConnection();
@@ -13,7 +29,13 @@ class User {
     });
   }
 
-  // Get user by email
+  /**
+   * Find a user by their email address
+   * Used primarily for authentication and password reset
+   * 
+   * @param {string} email - The email address to search for
+   * @returns {Promise<Object|null>} User object if found, null otherwise
+   */
   static async findByEmail(email) {
     return new Promise((resolve, reject) => {
       const db = getDbConnection();
@@ -24,18 +46,24 @@ class User {
     });
   }
 
-  // Create a new user
+  /**
+   * Create a new user in the database
+   * Automatically hashes the password for security
+   * 
+   * @param {Object} userData - User data including name, email, password, etc.
+   * @returns {Promise<Object>} The newly created user (without password)
+   */
   static async create(userData) {
     return new Promise(async (resolve, reject) => {
       try {
-        // Hash the password
+        // Hash the password with bcrypt for secure storage
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(userData.password, salt);
         
         const db = getDbConnection();
         const { name, email, phone, address, role = 'customer' } = userData;
         
-        // Update the schema
+        // Ensure the users table exists with the required schema
         db.run(
           `CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,17 +78,17 @@ class User {
           (err) => {
             if (err) return reject(err);
             
-            // Insert the user
+            // Insert the new user with hashed password
             db.run(
               'INSERT INTO users (name, email, password, phone, address, role) VALUES (?, ?, ?, ?, ?, ?)',
               [name, email, hashedPassword, phone || '', address || '', role],
               function(err) {
                 if (err) return reject(err);
                 
-                // Get the newly created user
+                // Retrieve the newly created user
                 db.get('SELECT * FROM users WHERE id = ?', [this.lastID], (err, user) => {
                   if (err) return reject(err);
-                  // Don't return the password
+                  // Remove password from result for security
                   delete user.password;
                   resolve(user);
                 });
@@ -74,7 +102,13 @@ class User {
     });
   }
 
-  // Update user details
+  /**
+   * Update a user's profile information
+   * 
+   * @param {number} id - User ID to update
+   * @param {Object} userData - Updated user data (name, email, phone, address)
+   * @returns {Promise<Object>} The updated user object
+   */
   static async update(id, userData) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -94,7 +128,7 @@ class User {
             // Get the updated user
             db.get('SELECT * FROM users WHERE id = ?', [id], (err, user) => {
               if (err) return reject(err);
-              // Don't return the password
+              // Remove password from result for security
               delete user.password;
               resolve(user);
             });
@@ -106,7 +140,15 @@ class User {
     });
   }
 
-  // Change password
+  /**
+   * Change a user's password
+   * Verifies the current password before allowing the change
+   * 
+   * @param {number} id - User ID
+   * @param {string} currentPassword - Current password for verification
+   * @param {string} newPassword - New password to set
+   * @returns {Promise<Object>} Success status object
+   */
   static async changePassword(id, currentPassword, newPassword) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -118,7 +160,7 @@ class User {
           return reject(new Error('User not found'));
         }
         
-        // Check if current password is correct
+        // Verify current password is correct
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
           return reject(new Error('Current password is incorrect'));
@@ -128,7 +170,7 @@ class User {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         
-        // Update the password
+        // Update the password in the database
         db.run(
           'UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
           [hashedPassword, id],
@@ -143,7 +185,12 @@ class User {
     });
   }
 
-  // Get all users (admin function)
+  /**
+   * Get all users (admin function)
+   * Excludes password fields for security
+   * 
+   * @returns {Promise<Array>} Array of all user objects
+   */
   static async findAll() {
     return new Promise((resolve, reject) => {
       const db = getDbConnection();
@@ -154,7 +201,12 @@ class User {
     });
   }
 
-  // Delete a user (admin function)
+  /**
+   * Delete a user by ID (admin function)
+   * 
+   * @param {number} id - User ID to delete
+   * @returns {Promise<Object>} Success status object
+   */
   static async delete(id) {
     return new Promise((resolve, reject) => {
       const db = getDbConnection();
@@ -170,7 +222,14 @@ class User {
     });
   }
 
-  // Verify password for login
+  /**
+   * Verify user password for login
+   * Handles password comparison with bcrypt and returns user if valid
+   * 
+   * @param {string} email - User's email address
+   * @param {string} password - Password to verify
+   * @returns {Promise<Object>} Success status and user object if valid
+   */
   static async verifyPassword(email, password) {
     try {
       const user = await this.findByEmail(email);
@@ -178,12 +237,13 @@ class User {
         return { success: false, message: 'User not found' };
       }
       
+      // Compare submitted password with hashed password
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return { success: false, message: 'Invalid credentials' };
       }
       
-      // Don't return the password
+      // Remove password from result for security
       delete user.password;
       return { success: true, user };
     } catch (err) {

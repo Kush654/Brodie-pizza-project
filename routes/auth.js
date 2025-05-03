@@ -37,15 +37,29 @@ router.post('/login', async (req, res) => {
       return res.redirect('/auth/login?error=Invalid email or password&redirect=' + redirect);
     }
     
-    // Set user in session
+    // Log user for debugging
+    console.log('Successful login for user:', result.user);
+    console.log('User role:', result.user.role);
+    
+    // Set user in session and save explicitly
     req.session.user = result.user;
     
-    // Redirect based on role
-    if (['employee', 'admin'].includes(result.user.role)) {
-      return res.redirect('/employee/dashboard');
-    }
-    
-    res.redirect(redirect);
+    // Save session explicitly to ensure it's written to storage
+    req.session.save(err => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.redirect('/auth/login?error=Session error, please try again');
+      }
+      
+      console.log('Session saved successfully');
+      
+      // Redirect based on role
+      if (['employee', 'admin'].includes(result.user.role)) {
+        return res.redirect('/employee/dashboard');
+      }
+      
+      res.redirect(redirect);
+    });
   } catch (err) {
     console.error('Login error:', err);
     res.redirect('/auth/login?error=An error occurred during login');
@@ -216,6 +230,17 @@ router.post('/change-password', isAuthenticated, async (req, res) => {
       error: err.message || 'An error occurred while changing your password'
     });
   }
+});
+
+// Debug route for checking session
+router.get('/debug-session', (req, res) => {
+  return res.json({
+    sessionExists: !!req.session,
+    userExists: !!req.session.user,
+    userData: req.session.user || 'No user in session',
+    sessionID: req.sessionID,
+    cookie: req.session.cookie
+  });
 });
 
 export default router; 

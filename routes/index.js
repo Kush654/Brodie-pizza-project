@@ -37,18 +37,4 @@ router.get('/contact', (req, res) => {
   });
 });
 
-// Privacy policy
-router.get('/privacy', (req, res) => {
-  res.render('privacy', {
-    title: 'Privacy Policy'
-  });
-});
-
-// Terms of service
-router.get('/terms', (req, res) => {
-  res.render('terms', {
-    title: 'Terms of Service'
-  });
-});
-
 export default router; 

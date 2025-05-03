@@ -6,17 +6,40 @@ import { isEmployee, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Test route to debug session
+router.get('/test-session', (req, res) => {
+  return res.json({
+    sessionExists: !!req.session,
+    userExists: !!req.session.user,
+    userData: req.session.user,
+    isEmployee: req.session.user && ['employee', 'admin'].includes(req.session.user.role)
+  });
+});
+
 // Employee dashboard
 router.get('/dashboard', isEmployee, async (req, res) => {
   try {
+    // Log authentication info for debugging
+    console.log('Dashboard route - Session user:', req.session.user);
+    console.log('Dashboard route - Locals user:', res.locals.user);
+    
     // Get pending and in-progress orders
     const pendingOrders = await Order.findByStatus('pending');
     const inProgressOrders = await Order.findByStatus('preparing');
     
+    // Ensure we have the user object from session
+    const user = req.session.user;
+    
+    if (!user) {
+      console.error('No user found in session!');
+      return res.redirect('/auth/login?redirect=/employee/dashboard');
+    }
+    
     res.render('employee/dashboard', {
       title: 'Employee Dashboard',
       pendingOrders,
-      inProgressOrders
+      inProgressOrders,
+      user: user // Explicitly pass user to ensure it's available in the template
     });
   } catch (err) {
     console.error('Employee dashboard error:', err);
@@ -63,7 +86,8 @@ router.get('/orders/:id', isEmployee, async (req, res) => {
     
     res.render('employee/order-details', {
       title: `Order #${order.id}`,
-      order
+      order,
+      user: req.session.user
     });
   } catch (err) {
     console.error('Employee order details error:', err);
@@ -153,7 +177,8 @@ router.get('/menu/add', isEmployee, async (req, res) => {
       title: 'Add Menu Item',
       categories,
       item: null,
-      formAction: '/employee/menu/add'
+      formAction: '/employee/menu/add',
+      user: req.session.user
     });
   } catch (err) {
     console.error('Add menu item form error:', err);
@@ -229,7 +254,8 @@ router.get('/menu/:id/edit', isEmployee, async (req, res) => {
       title: 'Edit Menu Item',
       categories,
       item,
-      formAction: `/employee/menu/${itemId}/edit`
+      formAction: `/employee/menu/${itemId}/edit`,
+      user: req.session.user
     });
   } catch (err) {
     console.error('Edit menu item form error:', err);
@@ -316,6 +342,32 @@ router.get('/schedules', isAdmin, async (req, res) => {
       message: 'An error occurred while loading the schedule management page'
     });
   }
+});
+
+// Debug route to check authentication status
+router.get('/debug-auth', (req, res) => {
+  // Check session
+  const sessionExists = !!req.session;
+  const userExists = !!req.session.user;
+  const userRole = userExists ? req.session.user.role : 'none';
+  const isEmployeeUser = userExists && ['employee', 'admin'].includes(req.session.user.role);
+  
+  // Check locals
+  const localsUserExists = !!res.locals.user;
+  const localsUserRole = localsUserExists ? res.locals.user.role : 'none';
+  
+  return res.json({
+    session: {
+      exists: sessionExists,
+      userExists,
+      userRole,
+      isEmployee: isEmployeeUser
+    },
+    locals: {
+      userExists: localsUserExists,
+      userRole: localsUserRole
+    }
+  });
 });
 
 export default router; 

@@ -26,7 +26,7 @@
 
 - **Frontend**: EJS templates, HTML, CSS, JavaScript
 - **Backend**: Node.js, Express.js
-- **Database**: MySQL/SQLite
+- **Database**: MySQL/SQLite (configurable, always uses SQLite but has the option for MySQL in the name of scalability)
 - **Authentication**: Express-session, bcrypt
 - **Email**: Nodemailer
 - **File Upload**: Multer
@@ -34,15 +34,30 @@
 
 ## Testing
 
-- Over 50 automated Mocha tests for every minor feature I could think of
+Core functionality testing added via Mocha for:
+- User registration and login
+- Cart management
+- Checkout process
+- Employee operations
+- Admin features
 
 ## Project Structure
 
-- **`/config`**: Configuration files for the application
+- **`/config`**: Configuration files including database setup
 - **`/data`**: Initial data and seeds for the database
-- **`/middleware`**: Custom middleware functions
-- **`/models`**: Database models
+- **`/middleware`**: Custom middleware functions (authentication, etc.)
+- **`/models`**: Database models (User, Order, MenuItem, etc.)
 - **`/public`**: Static assets (CSS, JavaScript, images)
-- **`/routes`**: Application routes
-- **`/views`**: EJS templates
-- **`app.js`**: Main application file
+- **`/routes`**: Application routes for different features
+- **`/views`**: EJS templates for rendering pages
+- **`app.js`**: Main application entry point
+- **`TestDocumentation.md`**: Documentation of test cases
+
+## Deployment Notes
+
+For production deployment:
+1. Set NODE_ENV=production in environment
+2. Use a process manager like PM2
+3. Ensure secure SESSION_SECRET value
+4. Configure proper database credentials if you are using MySQL for some reason 
+5. Set up HTTPS with a valid SSL certificate

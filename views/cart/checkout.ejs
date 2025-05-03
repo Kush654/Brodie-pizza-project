@@ -10,26 +10,32 @@
           <h5 class="mb-0">Delivery Information</h5>
         </div>
         <div class="card-body">
+          <% if (!user) { %>
+          <div class="alert alert-secondary mb-3">
+            <i class="fas fa-user-circle me-2"></i>
+            <strong>Not logged in?</strong> <a href="/auth/login" class="alert-link">Log in</a> or <a href="/auth/register" class="alert-link">create an account</a> for faster checkout and easy order tracking.
+          </div>
+          <% } %>
           <form id="checkout-form" action="/orders/create" method="POST">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="name" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="name" name="name" required>
+                <input type="text" class="form-control" id="name" name="name" value="<%= user ? user.name : '' %>" required>
               </div>
               <div class="col-md-6 mb-3">
                 <label for="phone" class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" id="phone" name="phone" required>
+                <input type="tel" class="form-control" id="phone" name="phone" value="<%= user && user.phone ? user.phone : '' %>" required>
               </div>
             </div>
             
             <div class="mb-3">
               <label for="email" class="form-label">Email Address</label>
-              <input type="email" class="form-control" id="email" name="email" required>
+              <input type="email" class="form-control" id="email" name="email" value="<%= user ? user.email : '' %>" required>
             </div>
             
             <div class="mb-3">
               <label for="address" class="form-label">Delivery Address</label>
-              <input type="text" class="form-control" id="address" name="address" required>
+              <input type="text" class="form-control" id="address" name="address" value="<%= user && user.address ? user.address : '' %>" required>
             </div>
             
             <div class="row">
@@ -55,6 +61,10 @@
             <hr class="my-4">
             
             <h5 class="mb-3">Payment Method</h5>
+            <div class="alert alert-info mb-3">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>Test Mode:</strong> This is a demo site. No actual payment information will be collected or processed.
+            </div>
             <div class="mb-3">
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" value="credit" checked>
@@ -74,26 +84,26 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="cardName" class="form-label">Name on Card</label>
-                  <input type="text" class="form-control" id="cardName" name="cardName">
+                  <input type="text" class="form-control" id="cardName" name="cardName" value="<%= user ? user.name : '' %>">
                 </div>
                 <div class="col-md-6 mb-3">
                   <label for="cardNumber" class="form-label">Card Number</label>
-                  <input type="text" class="form-control" id="cardNumber" name="cardNumber">
+                  <input type="text" class="form-control" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456">
                 </div>
               </div>
               
               <div class="row">
                 <div class="col-md-4 mb-3">
                   <label for="expMonth" class="form-label">Expiration Month</label>
-                  <input type="text" class="form-control" id="expMonth" name="expMonth">
+                  <input type="text" class="form-control" id="expMonth" name="expMonth" placeholder="MM">
                 </div>
                 <div class="col-md-4 mb-3">
                   <label for="expYear" class="form-label">Expiration Year</label>
-                  <input type="text" class="form-control" id="expYear" name="expYear">
+                  <input type="text" class="form-control" id="expYear" name="expYear" placeholder="YYYY">
                 </div>
                 <div class="col-md-4 mb-3">
                   <label for="cvv" class="form-label">CVV</label>
-                  <input type="text" class="form-control" id="cvv" name="cvv">
+                  <input type="text" class="form-control" id="cvv" name="cvv" placeholder="123">
                 </div>
               </div>
             </div>

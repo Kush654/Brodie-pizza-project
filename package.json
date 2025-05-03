@@ -6,14 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js",
-    "test": "mocha --timeout 10000 test/**/*.test.js",
-    "test:unit": "mocha --timeout 10000 test/unit/**/*.test.js",
-    "test:integration": "mocha --timeout 10000 test/integration/**/*.test.js",
-    "test:api": "mocha --timeout 10000 test/api/**/*.test.js",
-    "test:ci": "mocha --timeout 10000 --reporter spec test/unit/**/*.test.js && echo 'Unit tests passed' || exit 1",
-    "test:file": "mocha --timeout 10000",
-    "test:specific": "mocha --timeout 10000 --grep"
+    "dev": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
@@ -34,10 +27,6 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "chai": "^5.2.0",
-    "chai-http": "^5.1.2",
-    "mocha": "^11.2.2",
-    "nodemon": "^3.1.10",
-    "supertest": "^7.1.0"
+    "nodemon": "^3.1.10"
   }
 }

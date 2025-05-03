@@ -1,3 +1,11 @@
+/**
+ * Database Configuration Module
+ * 
+ * Handles database setup, initialization, and provides query utilities.
+ * Supports both MySQL and SQLite databases depending on configuration.
+ * SQLite is used as a fallback if MySQL is not configured.
+ */
+
 import mysql from 'mysql2/promise';
 import sqlite3 from 'sqlite3';
 import path from 'path';
@@ -5,18 +13,24 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import menuItems from '../data/menu-seed.js';
 
+// Convert ESM file URL to file path
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Determine which database to use based on environment
+// Database connection variables
 const useMySQL = process.env.DB_TYPE === 'mysql';
 let db;
 let pool;
 
+/**
+ * Initializes the database connection based on configuration
+ * If MySQL is specified in environment variables, connects to MySQL
+ * Otherwise, falls back to SQLite database
+ */
 const initializeDatabase = async () => {
   if (useMySQL) {
     try {
-      // Create MySQL connection pool
+      // Create MySQL connection pool for efficient connection management
       pool = mysql.createPool({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -39,12 +53,13 @@ const initializeDatabase = async () => {
     // Use SQLite as fallback
     const dbPath = path.join(__dirname, '..', 'data', 'pizza.db');
     
-    // Ensure data directory exists
+    // Ensure data directory exists before creating database
     const dataDir = path.join(__dirname, '..', 'data');
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
     
+    // Connect to SQLite database
     db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
         console.error('Error opening SQLite database:', err.message);
@@ -58,11 +73,15 @@ const initializeDatabase = async () => {
   }
 };
 
+/**
+ * Creates MySQL database tables if they don't exist
+ * Seeds initial menu items if the menu_items table is empty
+ */
 const initializeMySQLTables = async () => {
   try {
     const connection = await pool.getConnection();
     
-    // Create users table
+    // Create users table for authentication and user management
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -74,7 +93,7 @@ const initializeMySQLTables = async () => {
       )
     `);
     
-    // Create menu_items table
+    // Create menu_items table to store product catalog
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS menu_items (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -90,7 +109,7 @@ const initializeMySQLTables = async () => {
       )
     `);
     
-    // Create orders table
+    // Create orders table to track customer orders
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS orders (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -99,12 +118,14 @@ const initializeMySQLTables = async () => {
         total_price DECIMAL(10, 2) NOT NULL,
         delivery_address TEXT,
         contact_phone VARCHAR(20),
+        customer_name VARCHAR(100),
+        customer_email VARCHAR(100),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
       )
     `);
     
-    // Create order_items table
+    // Create order_items table for items within each order
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS order_items (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -145,12 +166,16 @@ const initializeMySQLTables = async () => {
   }
 };
 
+/**
+ * Creates SQLite database tables if they don't exist
+ * Seeds initial menu items if the menu_items table is empty
+ */
 const initializeSQLiteTables = () => {
-  // Run all statements in a single transaction
+  // Run all statements in a single transaction for better performance and consistency
   db.serialize(() => {
     db.run('BEGIN TRANSACTION');
     
-    // Create users table
+    // Create users table for authentication and user management
     db.run(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -162,7 +187,7 @@ const initializeSQLiteTables = () => {
       )
     `);
     
-    // Create menu_items table
+    // Create menu_items table to store product catalog
     db.run(`
       CREATE TABLE IF NOT EXISTS menu_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -178,7 +203,7 @@ const initializeSQLiteTables = () => {
       )
     `);
     
-    // Create orders table
+    // Create orders table to track customer orders
     db.run(`
       CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -187,12 +212,14 @@ const initializeSQLiteTables = () => {
         total_price REAL NOT NULL,
         delivery_address TEXT,
         contact_phone TEXT,
+        customer_name TEXT,
+        customer_email TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
       )
     `);
     
-    // Create order_items table
+    // Create order_items table for items within each order
     db.run(`
       CREATE TABLE IF NOT EXISTS order_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

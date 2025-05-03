@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
 // POST add item to cart
 router.post('/add', async (req, res) => {
   try {
-    const { menuItemId, quantity = 1 } = req.body;
+    const { menuItemId, quantity = 1, notes = '' } = req.body;
     
     // Get menu item details
     const menuItem = await MenuItem.findById(menuItemId);
@@ -54,6 +54,10 @@ router.post('/add', async (req, res) => {
     if (existingItemIndex !== -1) {
       // Update quantity if item exists
       req.session.cart[existingItemIndex].quantity += parseInt(quantity);
+      // Update special instructions if provided
+      if (notes) {
+        req.session.cart[existingItemIndex].specialInstructions = notes;
+      }
     } else {
       // Add new item to cart
       req.session.cart.push({
@@ -61,7 +65,8 @@ router.post('/add', async (req, res) => {
         name: menuItem.name,
         price: menuItem.price,
         image: menuItem.image_url,
-        quantity: parseInt(quantity)
+        quantity: parseInt(quantity),
+        specialInstructions: notes
       });
     }
     
@@ -124,7 +129,21 @@ router.post('/instructions', (req, res) => {
       return res.redirect('/cart');
     }
     
-    Cart.updateSpecialInstructions(req, parseInt(menuItemId), specialInstructions || '');
+    if (!req.session.cart) {
+      req.flash('error', 'Cart is empty');
+      return res.redirect('/cart');
+    }
+    
+    // Find the item in the cart
+    const cartItem = req.session.cart.find(item => item.id === menuItemId);
+    
+    if (!cartItem) {
+      req.flash('error', 'Item not found in cart');
+      return res.redirect('/cart');
+    }
+    
+    // Update special instructions
+    cartItem.specialInstructions = specialInstructions || '';
     
     req.flash('success', 'Special instructions updated');
     res.redirect('/cart');
@@ -202,10 +221,14 @@ router.get('/checkout', (req, res) => {
     return res.redirect('/cart');
   }
   
+  // Check if user is logged in and pass user data to the view
+  const user = req.session.user || null;
+  
   res.render('cart/checkout', {
     title: 'Checkout',
     cartItems,
-    total
+    total,
+    user
   });
 });
 

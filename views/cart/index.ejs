@@ -54,7 +54,7 @@
                         <div class="form-group">
                           <textarea class="form-control form-control-sm" name="specialInstructions" 
                                     placeholder="Any special requests?"
-                                    rows="2"><%= item.specialInstructions %></textarea>
+                                    rows="2"><%= item.specialInstructions || '' %></textarea>
                         </div>
                         <button type="submit" class="btn btn-sm btn-primary mt-2">Save Instructions</button>
                       </form>

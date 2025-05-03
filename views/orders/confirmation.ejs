@@ -38,6 +38,7 @@
           <div class="card bg-light h-100">
             <div class="card-body">
               <h5 class="mb-3">Delivery Information</h5>
+              <p class="mb-1"><strong>Name:</strong> <%= order.customer_name || 'Not specified' %></p>
               <p class="mb-1"><strong>Address:</strong> <%= order.delivery_address %></p>
               <p class="mb-0"><strong>Phone:</strong> <%= order.contact_phone %></p>
             </div>
@@ -84,6 +85,9 @@
       </div>
       
       <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+        <a href="/" class="btn btn-success">
+          <i class="fas fa-home me-2"></i> Return Home
+        </a>
         <a href="/orders/<%= order.id %>" class="btn btn-primary">
           <i class="fas fa-eye me-2"></i> View Order Details
         </a>

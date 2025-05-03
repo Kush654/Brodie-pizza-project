@@ -77,6 +77,8 @@ db.serialize(() => {
       total_price REAL NOT NULL,
       delivery_address TEXT,
       contact_phone TEXT,
+      customer_name TEXT,
+      customer_email TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )

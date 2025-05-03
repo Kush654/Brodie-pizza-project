@@ -1,3 +1,13 @@
+/**
+ * Orders Routes
+ * 
+ * Handles all order-related routes including:
+ * - Creating new orders from the shopping cart
+ * - Viewing order history and details
+ * - Order management for employees (viewing, updating status)
+ * - Order cancellation
+ */
+
 import express from 'express';
 import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
@@ -5,7 +15,13 @@ import { isAuthenticated, isEmployee, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Middleware to check if user can access an order
+/**
+ * Custom middleware to check if a user can access a specific order
+ * Allows access if the user is:
+ * - The order owner
+ * - An employee
+ * - An admin
+ */
 const canAccessOrder = async (req, res, next) => {
   try {
     const orderId = req.params.id;
@@ -20,7 +36,7 @@ const canAccessOrder = async (req, res, next) => {
     if (req.session.user.id === order.user_id || 
         req.session.user.role === 'employee' || 
         req.session.user.role === 'admin') {
-      req.order = order; // Attach order to request
+      req.order = order; // Attach order to request for use in route handlers
       return next();
     }
     
@@ -33,7 +49,11 @@ const canAccessOrder = async (req, res, next) => {
   }
 };
 
-// GET user's orders
+/**
+ * GET /orders
+ * Displays a list of the current user's orders
+ * Requires authentication
+ */
 router.get('/', isAuthenticated, async (req, res) => {
   try {
     const orders = await Order.findByUserId(req.session.user.id);
@@ -48,25 +68,35 @@ router.get('/', isAuthenticated, async (req, res) => {
   }
 });
 
-// POST create a new order
+/**
+ * POST /orders/create
+ * Creates a new order from the user's cart
+ * Collects delivery and payment information
+ */
 router.post('/create', async (req, res) => {
   try {
+    // Collect order data from the form submission
     const orderData = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
+      name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
       address: req.body.address,
       city: req.body.city,
       state: req.body.state,
       zip: req.body.zip,
-      deliveryInstructions: req.body.deliveryInstructions,
+      deliveryInstructions: req.body.notes,
       paymentMethod: req.body.paymentMethod
     };
     
+    // If user is logged in, associate order with user account
+    if (req.session.user) {
+      orderData.userId = req.session.user.id;
+    }
+    
+    // Create the order and save to database
     const order = await Order.createFromCart(req, orderData);
     
-    // Redirect to order confirmation
+    // Redirect to order confirmation page
     res.redirect(`/orders/${order.id}/confirmation`);
   } catch (error) {
     console.error('Create order error:', error);
@@ -75,7 +105,11 @@ router.post('/create', async (req, res) => {
   }
 });
 
-// GET order confirmation
+/**
+ * GET /orders/:id/confirmation
+ * Displays order confirmation after successful checkout
+ * Does not require authentication to support guest checkouts
+ */
 router.get('/:id/confirmation', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -86,7 +120,8 @@ router.get('/:id/confirmation', async (req, res) => {
     }
     
     res.render('orders/confirmation', {
-      order
+      order,
+      title: 'Order Confirmation'
     });
   } catch (error) {
     console.error('Order confirmation error:', error);
@@ -95,16 +130,26 @@ router.get('/:id/confirmation', async (req, res) => {
   }
 });
 
-// GET order details
+/**
+ * GET /orders/:id
+ * Displays detailed information about a specific order
+ * Requires authentication and permission to view the order
+ */
 router.get('/:id', isAuthenticated, canAccessOrder, (req, res) => {
   res.render('orders/details', {
     order: req.order
   });
 });
 
-// Employee routes
+/**
+ * Employee Order Management Routes
+ */
 
-// GET all orders (employees only)
+/**
+ * GET /orders/manage/all
+ * Displays all orders for employee management
+ * Requires employee role
+ */
 router.get('/manage/all', isEmployee, async (req, res) => {
   try {
     const orders = await Order.findAll();
@@ -119,7 +164,11 @@ router.get('/manage/all', isEmployee, async (req, res) => {
   }
 });
 
-// GET orders by status (employees only)
+/**
+ * GET /orders/manage/status/:status
+ * Filters orders by status (pending, preparing, ready, delivered, cancelled)
+ * Requires employee role
+ */
 router.get('/manage/status/:status', isEmployee, async (req, res) => {
   try {
     const status = req.params.status;
@@ -136,7 +185,11 @@ router.get('/manage/status/:status', isEmployee, async (req, res) => {
   }
 });
 
-// POST update order status (employees only)
+/**
+ * POST /orders/:id/update-status
+ * Updates the status of an order (pending → preparing → ready → delivered)
+ * Requires employee role
+ */
 router.post('/:id/update-status', isEmployee, async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -153,7 +206,12 @@ router.post('/:id/update-status', isEmployee, async (req, res) => {
   }
 });
 
-// POST cancel order
+/**
+ * POST /orders/:id/cancel
+ * Cancels a pending order
+ * Requires authentication and permission to access the order
+ * Only pending orders can be cancelled
+ */
 router.post('/:id/cancel', isAuthenticated, canAccessOrder, async (req, res) => {
   try {
     const orderId = req.params.id;
