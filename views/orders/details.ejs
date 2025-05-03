@@ -1,0 +1,117 @@
+<%- include('../partials/header', { title: 'Order Details' }) %>
+
+<div class="container py-5">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-4 mb-4">
+      <div class="list-group shadow-sm">
+        <a href="/auth/profile" class="list-group-item list-group-item-action">
+          <i class="fas fa-user me-2"></i> My Profile
+        </a>
+        <a href="/orders" class="list-group-item list-group-item-action">
+          <i class="fas fa-shopping-bag me-2"></i> My Orders
+        </a>
+        <a href="/auth/change-password" class="list-group-item list-group-item-action">
+          <i class="fas fa-key me-2"></i> Change Password
+        </a>
+        <a href="/auth/logout" class="list-group-item list-group-item-action text-danger">
+          <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a>
+      </div>
+    </div>
+    
+    <!-- Order Details Content -->
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Order #<%= order.id %></h4>
+          <a href="/orders" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Back to Orders
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <h5>Order Information</h5>
+              <p class="mb-1"><strong>Order Date:</strong> <%= new Date(order.created_at).toLocaleString() %></p>
+              <p class="mb-1">
+                <strong>Status:</strong> 
+                <% let statusBadgeClass = 'bg-secondary';
+                   if (order.status === 'pending') statusBadgeClass = 'bg-warning text-dark';
+                   if (order.status === 'preparing') statusBadgeClass = 'bg-info text-dark';
+                   if (order.status === 'ready') statusBadgeClass = 'bg-success';
+                   if (order.status === 'delivered') statusBadgeClass = 'bg-primary';
+                   if (order.status === 'cancelled') statusBadgeClass = 'bg-danger';
+                %>
+                <span class="badge <%= statusBadgeClass %>">
+                  <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                </span>
+              </p>
+              <p class="mb-1"><strong>Total:</strong> $<%= parseFloat(order.total_price).toFixed(2) %></p>
+            </div>
+            <div class="col-md-6">
+              <h5>Delivery Information</h5>
+              <p class="mb-1"><strong>Address:</strong> <%= order.delivery_address %></p>
+              <p class="mb-1"><strong>Phone:</strong> <%= order.contact_phone %></p>
+            </div>
+          </div>
+          
+          <% if (order.status === 'pending') { %>
+            <div class="mb-4">
+              <form action="/orders/<%= order.id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                <button type="submit" class="btn btn-danger">
+                  <i class="fas fa-times-circle me-2"></i> Cancel Order
+                </button>
+              </form>
+            </div>
+          <% } %>
+          
+          <h5>Order Items</h5>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (order.items && order.items.length > 0) { %>
+                  <% order.items.forEach(item => { %>
+                    <tr>
+                      <td>
+                        <strong><%= item.name %></strong>
+                        <% if (item.special_instructions) { %>
+                          <div class="small text-muted">
+                            <em>Note: <%= item.special_instructions %></em>
+                          </div>
+                        <% } %>
+                      </td>
+                      <td>$<%= parseFloat(item.price).toFixed(2) %></td>
+                      <td><%= item.quantity %></td>
+                      <td>$<%= (parseFloat(item.price) * parseInt(item.quantity)).toFixed(2) %></td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="text-center">No items in this order</td>
+                  </tr>
+                <% } %>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="3" class="text-end">Total:</th>
+                  <th>$<%= parseFloat(order.total_price).toFixed(2) %></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %> 

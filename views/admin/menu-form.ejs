@@ -1,0 +1,167 @@
+<%- include('../partials/header', { title }) %>
+
+<div class="container py-5">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
+      <div class="list-group shadow-sm">
+        <a href="/admin/dashboard" class="list-group-item list-group-item-action">
+          <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+        <a href="/admin/menu" class="list-group-item list-group-item-action active">
+          <i class="fas fa-pizza-slice me-2"></i> Manage Menu
+        </a>
+        <a href="/admin/users" class="list-group-item list-group-item-action">
+          <i class="fas fa-users me-2"></i> Manage Users
+        </a>
+        <a href="/employee/orders" class="list-group-item list-group-item-action">
+          <i class="fas fa-list-alt me-2"></i> Orders
+        </a>
+        <a href="/" class="list-group-item list-group-item-action">
+          <i class="fas fa-home me-2"></i> Back to Site
+        </a>
+        <a href="/auth/logout" class="list-group-item list-group-item-action text-danger">
+          <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a>
+      </div>
+    </div>
+    
+    <!-- Menu Form Content -->
+    <div class="col-md-9">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">
+            <% if (menuItem && menuItem.id) { %>
+              <i class="fas fa-edit me-2"></i>Edit Menu Item
+            <% } else { %>
+              <i class="fas fa-plus me-2"></i>Add Menu Item
+            <% } %>
+          </h4>
+          <a href="/admin/menu" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Back to Menu
+          </a>
+        </div>
+        <div class="card-body">
+          <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <form method="POST" action="<%= formAction %>">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Item Name</label>
+                  <input type="text" class="form-control" id="name" name="name" 
+                         value="<%= menuItem ? menuItem.name || '' : '' %>" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="description" class="form-label">Description</label>
+                  <textarea class="form-control" id="description" name="description" rows="3"><%= menuItem ? menuItem.description || '' : '' %></textarea>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="price" class="form-label">Price ($)</label>
+                      <input type="number" class="form-control" id="price" name="price" step="0.01" min="0.01"
+                             value="<%= menuItem && menuItem.price ? menuItem.price : '' %>" required>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="category" class="form-label">Category</label>
+                      <select class="form-select" id="category" name="category" required>
+                        <option value="" disabled <%= !menuItem || !menuItem.category ? 'selected' : '' %>>Select a category</option>
+                        <% categories.forEach(category => { %>
+                          <option value="<%= category %>" <%= menuItem && menuItem.category === category ? 'selected' : '' %>><%= category %></option>
+                        <% }); %>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="image" class="form-label">Image URL</label>
+                  <input type="text" class="form-control" id="image" name="image" 
+                         value="<%= menuItem && menuItem.image ? menuItem.image : '' %>" 
+                         placeholder="Leave blank for default category placeholder">
+                  <div class="form-text">
+                    If left blank, a default placeholder image for the selected category will be used.
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-header">Image Preview</div>
+                  <div class="card-body text-center">
+                    <img id="imagePreview" 
+                         src="<%= menuItem && menuItem.image ? menuItem.image : '/images/placeholder.svg' %>" 
+                         alt="Item preview" 
+                         class="img-fluid rounded mb-3" 
+                         style="max-height: 200px; width: auto;">
+                    <div class="form-text">
+                      Image preview will update when you enter an image URL.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <hr>
+            
+            <div class="d-flex justify-content-between">
+              <a href="/admin/menu" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">
+                <% if (menuItem && menuItem.id) { %>
+                  Update Menu Item
+                <% } else { %>
+                  Add Menu Item
+                <% } %>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    const categorySelect = document.getElementById('category');
+    
+    // Update image preview when image URL changes
+    imageInput.addEventListener('input', updateImagePreview);
+    
+    // Update image placeholder when category changes and image is empty
+    categorySelect.addEventListener('change', function() {
+      if (!imageInput.value) {
+        const category = categorySelect.value.toLowerCase();
+        imagePreview.src = `/images/${category}-placeholder.svg`;
+      }
+    });
+    
+    function updateImagePreview() {
+      if (imageInput.value) {
+        imagePreview.src = imageInput.value;
+      } else {
+        // Use category placeholder if available
+        const category = categorySelect.value.toLowerCase();
+        if (category) {
+          imagePreview.src = `/images/${category}-placeholder.svg`;
+        } else {
+          imagePreview.src = '/images/placeholder.svg';
+        }
+      }
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %> 

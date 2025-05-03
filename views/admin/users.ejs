@@ -1,0 +1,157 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h1>User Management</h1>
+  
+  <% if (locals.success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <%= success %>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  <% } %>
+  
+  <div class="card mb-4">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" id="employees-tab" data-toggle="tab" href="#employees" role="tab" aria-controls="employees" aria-selected="true">Employees</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="customers-tab" data-toggle="tab" href="#customers" role="tab" aria-controls="customers" aria-selected="false">Customers</a>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+      <div class="tab-content" id="myTabContent">
+        <!-- Employees Tab -->
+        <div class="tab-pane fade show active" id="employees" role="tabpanel" aria-labelledby="employees-tab">
+          <div class="d-flex justify-content-between mb-3">
+            <h3>Employee Accounts</h3>
+            <a href="/admin/users/new-employee" class="btn btn-primary">Add New Employee</a>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-bordered" id="employeesTable" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Phone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.filter(user => ['employee', 'admin'].includes(user.role)).forEach(employee => { %>
+                  <tr>
+                    <td><%= employee.name %></td>
+                    <td><%= employee.email %></td>
+                    <td><%= employee.role %></td>
+                    <td><%= employee.phone || 'N/A' %></td>
+                    <td>
+                      <a href="/admin/users/<%= employee.id %>/edit" class="btn btn-sm btn-primary">Edit</a>
+                      <% if (employee.id !== user.id) { %>
+                        <button 
+                          class="btn btn-sm btn-danger" 
+                          data-toggle="modal" 
+                          data-target="#deleteModal" 
+                          data-id="<%= employee.id %>" 
+                          data-name="<%= employee.name %>">
+                          Delete
+                        </button>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Customers Tab -->
+        <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">
+          <h3 class="mb-3">Customer Accounts</h3>
+          
+          <div class="table-responsive">
+            <table class="table table-bordered" id="customersTable" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Address</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.filter(user => user.role === 'customer').forEach(customer => { %>
+                  <tr>
+                    <td><%= customer.name %></td>
+                    <td><%= customer.email %></td>
+                    <td><%= customer.phone || 'N/A' %></td>
+                    <td><%= customer.address || 'N/A' %></td>
+                    <td>
+                      <a href="/admin/users/<%= customer.id %>/edit" class="btn btn-sm btn-primary">Edit</a>
+                      <button 
+                        class="btn btn-sm btn-danger" 
+                        data-toggle="modal" 
+                        data-target="#deleteModal" 
+                        data-id="<%= customer.id %>" 
+                        data-name="<%= customer.name %>">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <span id="userName"></span>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <form id="deleteForm" method="POST" action="">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('#employeesTable').DataTable();
+    $('#customersTable').DataTable();
+    
+    $('#deleteModal').on('show.bs.modal', function (event) {
+      const button = $(event.relatedTarget);
+      const id = button.data('id');
+      const name = button.data('name');
+      
+      const modal = $(this);
+      modal.find('#userName').text(name);
+      modal.find('#deleteForm').attr('action', `/admin/users/${id}/delete`);
+    });
+  });
+</script>
+
+<%- include('../partials/footer') %> 

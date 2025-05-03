@@ -1,0 +1,245 @@
+<%- include('../partials/header') %>
+
+<div class="container my-5">
+  <h1 class="mb-4">Shopping Cart</h1>
+  
+  <% if (cartItems && cartItems.length > 0) { %>
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Your Items</h5>
+          </div>
+          <div class="card-body">
+            <% cartItems.forEach(item => { %>
+              <div class="row mb-4 border-bottom pb-4">
+                <div class="col-md-3">
+                  <img src="<%= item.image || '/images/placeholder.jpg' %>" alt="<%= item.name %>" class="img-fluid rounded">
+                </div>
+                <div class="col-md-9">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <h5><%= item.name %></h5>
+                    <h6>$<%= (item.price * item.quantity).toFixed(2) %></h6>
+                  </div>
+                  <p class="text-muted">$<%= item.price.toFixed(2) %> each</p>
+                  
+                  <div class="d-flex align-items-center mt-2">
+                    <div class="input-group quantity-selector me-3" style="width: 120px;">
+                      <button class="btn btn-outline-secondary quantity-btn" type="button" 
+                              data-action="decrease" data-item-id="<%= item.id %>">-</button>
+                      <input type="number" class="form-control text-center quantity-input" 
+                              value="<%= item.quantity %>" min="1" data-item-id="<%= item.id %>">
+                      <button class="btn btn-outline-secondary quantity-btn" type="button" 
+                              data-action="increase" data-item-id="<%= item.id %>">+</button>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-item" data-item-id="<%= item.id %>">
+                      <i class="fas fa-trash"></i> Remove
+                    </button>
+                  </div>
+                  
+                  <% if (item.specialInstructions) { %>
+                    <div class="mt-2">
+                      <small class="text-muted">Special instructions: <%= item.specialInstructions %></small>
+                    </div>
+                  <% } %>
+                  
+                  <div class="mt-2">
+                    <button class="btn btn-sm btn-link p-0" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#instructions-<%= item.id %>">
+                      <small>Add/Edit Special Instructions</small>
+                    </button>
+                    <div class="collapse mt-2" id="instructions-<%= item.id %>">
+                      <form action="/cart/instructions" method="POST">
+                        <input type="hidden" name="menuItemId" value="<%= item.id %>">
+                        <div class="form-group">
+                          <textarea class="form-control form-control-sm" name="specialInstructions" 
+                                    placeholder="Any special requests?"
+                                    rows="2"><%= item.specialInstructions %></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary mt-2">Save Instructions</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+            
+            <div class="d-flex justify-content-between mt-3">
+              <a href="/menu" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Continue Shopping
+              </a>
+              <button type="button" id="clear-cart" class="btn btn-outline-danger">
+                <i class="fas fa-times-circle"></i> Clear Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Order Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-3">
+              <span>Subtotal</span>
+              <span>$<%= total %></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+              <span>Tax (8%)</span>
+              <span>$<%= (parseFloat(total) * 0.08).toFixed(2) %></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+              <span>Delivery Fee</span>
+              <span>$3.99</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-3">
+              <strong>Total</strong>
+              <strong>$<%= (parseFloat(total) + (parseFloat(total) * 0.08) + 3.99).toFixed(2) %></strong>
+            </div>
+            
+            <a href="/cart/checkout" class="btn btn-success btn-lg w-100 mt-3">
+              Proceed to Checkout
+            </a>
+          </div>
+        </div>
+        
+        <div class="card mt-3 shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title">Promo Code</h6>
+            <form action="/cart/promo" method="POST">
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" name="promoCode" 
+                       placeholder="Enter code" aria-label="Promo code">
+                <button class="btn btn-outline-secondary" type="submit">Apply</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="text-center py-5">
+      <i class="fas fa-shopping-cart" style="font-size: 5rem;"></i>
+      <h3 class="mt-4">Your cart is empty</h3>
+      <p class="text-muted">Looks like you haven't added any pizzas to your cart yet.</p>
+      <a href="/menu" class="btn btn-primary mt-3">Browse Our Menu</a>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle quantity updates
+    const quantityBtns = document.querySelectorAll('.quantity-btn');
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    const removeButtons = document.querySelectorAll('.remove-item');
+    const clearCartBtn = document.getElementById('clear-cart');
+    
+    quantityBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const itemId = this.dataset.itemId;
+        const action = this.dataset.action;
+        const input = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
+        let value = parseInt(input.value);
+        
+        if (action === 'increase') {
+          value++;
+        } else if (action === 'decrease' && value > 1) {
+          value--;
+        }
+        
+        input.value = value;
+        updateQuantity(itemId, value);
+      });
+    });
+    
+    quantityInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        const itemId = this.dataset.itemId;
+        let value = parseInt(this.value);
+        
+        if (value < 1) {
+          value = 1;
+          this.value = value;
+        }
+        
+        updateQuantity(itemId, value);
+      });
+    });
+    
+    removeButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const itemId = this.dataset.itemId;
+        removeItem(itemId);
+      });
+    });
+    
+    if (clearCartBtn) {
+      clearCartBtn.addEventListener('click', clearCart);
+    }
+    
+    function updateQuantity(itemId, quantity) {
+      fetch('/cart/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ menuItemId: itemId, quantity: quantity })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Reload the page to show updated cart
+          window.location.reload();
+        }
+      })
+      .catch(error => {
+        console.error('Error updating cart:', error);
+      });
+    }
+    
+    function removeItem(itemId) {
+      fetch('/cart/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ menuItemId: itemId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Reload the page to show updated cart
+          window.location.reload();
+        }
+      })
+      .catch(error => {
+        console.error('Error removing item:', error);
+      });
+    }
+    
+    function clearCart() {
+      fetch('/cart/clear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Reload the page to show updated cart
+          window.location.reload();
+        }
+      })
+      .catch(error => {
+        console.error('Error clearing cart:', error);
+      });
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %> 

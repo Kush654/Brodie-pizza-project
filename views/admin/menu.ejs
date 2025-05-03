@@ -1,0 +1,217 @@
+<%- include('../partials/header', { title: 'Menu Management' }) %>
+
+<div class="container py-5">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
+      <div class="list-group shadow-sm">
+        <a href="/admin/dashboard" class="list-group-item list-group-item-action">
+          <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+        <a href="/admin/menu" class="list-group-item list-group-item-action active">
+          <i class="fas fa-pizza-slice me-2"></i> Manage Menu
+        </a>
+        <a href="/admin/users" class="list-group-item list-group-item-action">
+          <i class="fas fa-users me-2"></i> Manage Users
+        </a>
+        <a href="/employee/orders" class="list-group-item list-group-item-action">
+          <i class="fas fa-list-alt me-2"></i> Orders
+        </a>
+        <a href="/" class="list-group-item list-group-item-action">
+          <i class="fas fa-home me-2"></i> Back to Site
+        </a>
+        <a href="/auth/logout" class="list-group-item list-group-item-action text-danger">
+          <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a>
+      </div>
+    </div>
+    
+    <!-- Menu Management Content -->
+    <div class="col-md-9">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0"><i class="fas fa-pizza-slice me-2"></i>Menu Management</h4>
+          <a href="/admin/menu/add" class="btn btn-success btn-sm">
+            <i class="fas fa-plus me-1"></i> Add Menu Item
+          </a>
+        </div>
+        <div class="card-body">
+          <% if (typeof success !== 'undefined') { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <%= success %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          <% } %>
+
+          <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+              <a class="nav-link active" data-bs-toggle="tab" href="#all-items">All Items</a>
+            </li>
+            <% categories.forEach(category => { %>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#<%= category.toLowerCase().replace(/\s+/g, '-') %>">
+                  <%= category %>
+                </a>
+              </li>
+            <% }); %>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="all-items">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Image</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (menuItems.length === 0) { %>
+                      <tr>
+                        <td colspan="5" class="text-center py-4">No menu items found</td>
+                      </tr>
+                    <% } else { %>
+                      <% menuItems.forEach(item => { %>
+                        <tr>
+                          <td>
+                            <img src="<%= item.image %>" alt="<%= item.name %>" width="50" height="50" class="rounded-circle">
+                          </td>
+                          <td><%= item.name %></td>
+                          <td><span class="badge bg-primary"><%= item.category %></span></td>
+                          <td>$<%= item.price.toFixed(2) %></td>
+                          <td>
+                            <div class="btn-group btn-group-sm">
+                              <a href="/admin/menu/<%= item.id %>/edit" class="btn btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                              </a>
+                              <button type="button" class="btn btn-outline-danger" 
+                                      data-bs-toggle="modal" 
+                                      data-bs-target="#deleteModal" 
+                                      data-item-id="<%= item.id %>" 
+                                      data-item-name="<%= item.name %>">
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      <% }); %>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <% categories.forEach(category => { %>
+              <div class="tab-pane fade" id="<%= category.toLowerCase().replace(/\s+/g, '-') %>">
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% const categoryItems = menuItems.filter(item => item.category === category); %>
+                      <% if (categoryItems.length === 0) { %>
+                        <tr>
+                          <td colspan="4" class="text-center py-4">No items in this category</td>
+                        </tr>
+                      <% } else { %>
+                        <% categoryItems.forEach(item => { %>
+                          <tr>
+                            <td>
+                              <img src="<%= item.image %>" alt="<%= item.name %>" width="50" height="50" class="rounded-circle">
+                            </td>
+                            <td><%= item.name %></td>
+                            <td>$<%= item.price.toFixed(2) %></td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <a href="/admin/menu/<%= item.id %>/edit" class="btn btn-outline-primary">
+                                  <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal" 
+                                        data-item-id="<%= item.id %>" 
+                                        data-item-name="<%= item.name %>">
+                                  <i class="fas fa-trash"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        <% }); %>
+                      <% } %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <span id="itemName"></span>? This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteForm" method="POST" action="">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    
+    // Show success message if present
+    if (success) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-success alert-dismissible fade show';
+      alertDiv.setAttribute('role', 'alert');
+      alertDiv.innerHTML = `
+        ${success}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      document.querySelector('.card-body').prepend(alertDiv);
+    }
+    
+    // Handle delete modal
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+      deleteModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const itemId = button.getAttribute('data-item-id');
+        const itemName = button.getAttribute('data-item-name');
+        
+        document.getElementById('itemName').textContent = itemName;
+        document.getElementById('deleteForm').action = `/admin/menu/${itemId}/delete`;
+      });
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %> 

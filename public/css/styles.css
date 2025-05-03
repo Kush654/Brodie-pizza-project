@@ -1,0 +1,315 @@
+/* Global Styles */
+:root {
+  --primary-color: #e74c3c;
+  --secondary-color: #34495e;
+  --accent-color: #f39c12;
+  --text-color: #333;
+  --light-color: #ecf0f1;
+  --dark-color: #2c3e50;
+  --success-color: #27ae60;
+  --danger-color: #c0392b;
+  --warning-color: #f1c40f;
+  --info-color: #3498db;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Navigation */
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.navbar-dark .navbar-brand {
+  color: var(--primary-color);
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.3s;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: var(--primary-color);
+}
+
+.cart-count {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  text-align: center;
+  line-height: 20px;
+  margin-left: 5px;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-title {
+  color: var(--secondary-color);
+  font-weight: bold;
+}
+
+.card-text {
+  color: #666;
+}
+
+/* Hero Section */
+.hero {
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 5rem 0;
+  margin-bottom: 3rem;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/pizza-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.hero-content {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+/* Menu Items */
+.menu-item {
+  margin-bottom: 2rem;
+}
+
+.menu-item .price {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.menu-category {
+  margin-bottom: 3rem;
+}
+
+.menu-category-title {
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--dark-color);
+}
+
+.item-image {
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Forms */
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.25);
+}
+
+.form-label {
+  font-weight: 500;
+}
+
+/* Cart */
+.cart-item {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.cart-total {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+/* Order Summary */
+.order-summary {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.summary-total {
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-top: 1px solid #ddd;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+/* Order Status */
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.status-pending {
+  background-color: var(--warning-color);
+  color: #333;
+}
+
+.status-in_progress {
+  background-color: var(--info-color);
+  color: white;
+}
+
+.status-completed {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.status-cancelled {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* Footer */
+footer {
+  background-color: var(--dark-color);
+  color: white;
+  padding: 3rem 0;
+  margin-top: auto;
+}
+
+footer h5 {
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+footer a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+footer a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+/* Admin/Employee Dashboard */
+.dashboard-card {
+  border-left: 5px solid var(--primary-color);
+  transition: transform 0.3s;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-icon {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .hero {
+    padding: 3rem 0;
+  }
+  
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+  
+  .card-img-top {
+    height: 150px;
+  }
+  
+  .order-summary {
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .hero p {
+    font-size: 1rem;
+  }
+  
+  .card-img-top {
+    height: 120px;
+  }
+} 

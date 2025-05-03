@@ -1,0 +1,101 @@
+<%- include('../partials/header', { title: 'Order Confirmation' }) %>
+
+<div class="container py-5">
+  <div class="card shadow-lg border-0">
+    <div class="card-body p-5 text-center">
+      <div class="display-4 text-success mb-4">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h1 class="display-5 mb-4">Order Placed Successfully!</h1>
+      <p class="lead mb-4">Thank you for your order. We'll start preparing your delicious pizza right away.</p>
+      
+      <div class="alert alert-info mb-4">
+        <div class="row align-items-center">
+          <div class="col-md-6 text-md-start">
+            <h5 class="mb-1">Order #<%= order.id %></h5>
+            <p class="mb-0">Placed on <%= new Date(order.created_at).toLocaleString() %></p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <strong>Total:</strong> $<%= parseFloat(order.total_price).toFixed(2) %>
+          </div>
+        </div>
+      </div>
+      
+      <hr class="my-4">
+      
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <div class="card bg-light h-100">
+            <div class="card-body">
+              <h5 class="mb-3">Order Details</h5>
+              <p class="mb-1"><strong>Status:</strong> <span class="badge bg-warning text-dark">Pending</span></p>
+              <p class="mb-1"><strong>Estimated Delivery:</strong> 30-45 minutes</p>
+              <p class="mb-0"><strong>Payment Method:</strong> Pay on Delivery</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card bg-light h-100">
+            <div class="card-body">
+              <h5 class="mb-3">Delivery Information</h5>
+              <p class="mb-1"><strong>Address:</strong> <%= order.delivery_address %></p>
+              <p class="mb-0"><strong>Phone:</strong> <%= order.contact_phone %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="table-responsive mb-4">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="text-start">Item</th>
+              <th>Quantity</th>
+              <th class="text-end">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (order.items && order.items.length > 0) { %>
+              <% order.items.forEach(item => { %>
+                <tr>
+                  <td class="text-start">
+                    <strong><%= item.name %></strong>
+                    <% if (item.special_instructions) { %>
+                      <div class="small text-muted">
+                        <em><%= item.special_instructions %></em>
+                      </div>
+                    <% } %>
+                  </td>
+                  <td class="text-center"><%= item.quantity %></td>
+                  <td class="text-end">$<%= (parseFloat(item.price) * parseInt(item.quantity)).toFixed(2) %></td>
+                </tr>
+              <% }); %>
+            <% } else { %>
+              <tr>
+                <td colspan="3" class="text-center">No items in this order</td>
+              </tr>
+            <% } %>
+            <tr>
+              <th colspan="2" class="text-end">Total:</th>
+              <th class="text-end">$<%= parseFloat(order.total_price).toFixed(2) %></th>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+        <a href="/orders/<%= order.id %>" class="btn btn-primary">
+          <i class="fas fa-eye me-2"></i> View Order Details
+        </a>
+        <a href="/orders" class="btn btn-outline-primary">
+          <i class="fas fa-list me-2"></i> My Orders
+        </a>
+        <a href="/menu" class="btn btn-outline-secondary">
+          <i class="fas fa-pizza-slice me-2"></i> Order Again
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %> 

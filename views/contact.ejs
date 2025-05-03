@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+
+<div class="container my-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <h1 class="mb-4">Contact Us</h1>
+      
+      <div class="row mb-5">
+        <div class="col-md-6 mb-4 mb-md-0">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h2 class="h4 mb-3">Restaurant Information</h2>
+              <p><strong><i class="fas fa-map-marker-alt me-2"></i>Address:</strong><br>
+              456 International Drive<br>
+              Orlando, FL 32819</p>
+              
+              <p><strong><i class="fas fa-phone me-2"></i>Phone:</strong><br>
+              (407) 123-4567</p>
+              
+              <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+              info@pizzarestaurant.com</p>
+              
+              <h3 class="h5 mt-4 mb-2">Hours of Operation</h3>
+              <p class="mb-1"><strong>Monday - Thursday:</strong> 11:00 AM - 10:00 PM</p>
+              <p class="mb-1"><strong>Friday - Saturday:</strong> 11:00 AM - 11:00 PM</p>
+              <p><strong>Sunday:</strong> 12:00 PM - 9:00 PM</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h2 class="h4 mb-3">Send Us a Message</h2>
+              <form>
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input type="text" class="form-control" id="name" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="email" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="subject" class="form-label">Subject</label>
+                  <input type="text" class="form-control" id="subject">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="message" class="form-label">Message</label>
+                  <textarea class="form-control" id="message" rows="4" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Send Message</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h4 mb-3">Our Location</h2>
+          <div class="ratio ratio-16x9">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3508.0447621424256!2d-81.47196518491142!3d28.459848982486843!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88e77e378ec5aa89%3A0x2feec9271ed22c5b!2sInternational%20Dr%2C%20Orlando%2C%20FL%2032819!5e0!3m2!1sen!2sus!4v1631234567890!5m2!1sen!2sus" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %> 

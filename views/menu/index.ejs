@@ -1,0 +1,79 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container py-5">
+  <!-- Page Title -->
+  <div class="row mb-5">
+    <div class="col-md-8">
+      <h1 class="display-4">Our Menu</h1>
+      <p class="lead">Explore our wide range of delicious pizzas and other offerings.</p>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Categories</h5>
+          <select id="categoryFilter" class="form-select">
+            <option value="all" <%= activeCategory === 'All' ? 'selected' : '' %>>All Items</option>
+            <% if (categories && categories.length > 0) { %>
+              <% categories.forEach(function(category) { %>
+                <option value="<%= category %>" <%= activeCategory === category ? 'selected' : '' %>><%= category %></option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Items -->
+  <div class="row">
+    <% if (menuItems && menuItems.length > 0) { %>
+      <% 
+        // Group items by category
+        const itemsByCategory = {};
+        menuItems.forEach(function(item) {
+          if (!itemsByCategory[item.category]) {
+            itemsByCategory[item.category] = [];
+          }
+          itemsByCategory[item.category].push(item);
+        });
+      %>
+      
+      <% for (const category in itemsByCategory) { %>
+        <div class="col-12 menu-category">
+          <h2 class="menu-category-title"><%= category %></h2>
+          <div class="row">
+            <% itemsByCategory[category].forEach(function(item) { %>
+              <div class="col-md-6 col-lg-4 menu-item">
+                <div class="card h-100 shadow-sm">
+                  <img src="<%= item.image_url || '/images/default-pizza.jpg' %>" class="card-img-top" alt="<%= item.name %>">
+                  <div class="card-body">
+                    <h5 class="card-title"><%= item.name %></h5>
+                    <p class="card-text"><%= item.description %></p>
+                    <p class="price">$<%= item.price.toFixed(2) %></p>
+                  </div>
+                  <div class="card-footer bg-white border-top-0">
+                    <div class="d-flex justify-content-between">
+                      <a href="/menu/item/<%= item.id %>" class="btn btn-sm btn-outline-primary">View Details</a>
+                      <button class="btn btn-sm btn-primary add-to-cart-btn" data-item-id="<%= item.id %>">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
+    <% } else { %>
+      <div class="col-12 text-center py-5">
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle me-2"></i>
+          No menu items available for this category. Please check back later or try a different category.
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %> 

@@ -1,0 +1,147 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/employee/dashboard">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="/employee/orders">Orders</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Order #<%= order.id %></li>
+    </ol>
+  </nav>
+  
+  <% if (flash && flash.success && flash.success.length > 0) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <%= flash.success[0] %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+  
+  <% if (flash && flash.error && flash.error.length > 0) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= flash.error[0] %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+  
+  <div class="row">
+    <!-- Order Details -->
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Order #<%= order.id %></h4>
+          <span class="badge rounded-pill bg-<%= 
+            order.status === 'pending' ? 'warning' : 
+            order.status === 'preparing' ? 'info' : 
+            order.status === 'ready' ? 'primary' : 
+            order.status === 'delivered' ? 'success' : 'danger' 
+          %>">
+            <%= order.status.toUpperCase() %>
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p><strong>Order Date:</strong> <%= new Date(order.created_at).toLocaleString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              }) %></p>
+              <p><strong>Customer:</strong> <%= order.user_name || 'Guest' %></p>
+              <p><strong>Email:</strong> <%= order.user_email || 'N/A' %></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Delivery Address:</strong> <%= order.delivery_address %></p>
+              <p><strong>Contact Phone:</strong> <%= order.contact_phone %></p>
+              <p><strong>Total Amount:</strong> $<%= order.total_price.toFixed(2) %></p>
+            </div>
+          </div>
+          
+          <!-- Order Items -->
+          <h5 class="mb-3">Order Items</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Item</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (order.items && order.items.length > 0) { %>
+                  <% order.items.forEach(function(item) { %>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <% if (item.image) { %>
+                            <img src="<%= item.image %>" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                          <% } %>
+                          <div>
+                            <div><strong><%= item.name %></strong></div>
+                            <% if (item.special_instructions) { %>
+                              <small class="text-muted"><em>Note: <%= item.special_instructions %></em></small>
+                            <% } %>
+                          </div>
+                        </div>
+                      </td>
+                      <td>$<%= item.price.toFixed(2) %></td>
+                      <td><%= item.quantity %></td>
+                      <td>$<%= (item.price * item.quantity).toFixed(2) %></td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="text-center">No items found</td>
+                  </tr>
+                <% } %>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                  <td><strong>$<%= order.total_price.toFixed(2) %></strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Management -->
+    <div class="col-lg-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Order Management</h5>
+        </div>
+        <div class="card-body">
+          <form id="orderStatusForm" action="/employee/orders/<%= order.id %>/status" method="POST" data-order-id="<%= order.id %>">
+            <div class="mb-3">
+              <label for="orderStatus" class="form-label">Update Status</label>
+              <select class="form-select" id="orderStatus" name="status">
+                <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="preparing" <%= order.status === 'preparing' ? 'selected' : '' %>>Preparing</option>
+                <option value="ready" <%= order.status === 'ready' ? 'selected' : '' %>>Ready for Delivery</option>
+                <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Update Status</button>
+          </form>
+          
+          <hr>
+          
+          <div class="d-grid gap-2">
+            <a href="/employee/orders" class="btn btn-outline-secondary">Back to Orders</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %> 

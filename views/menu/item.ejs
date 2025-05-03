@@ -1,0 +1,123 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container py-5">
+  <!-- Breadcrumb Navigation -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item"><a href="/menu">Menu</a></li>
+      <li class="breadcrumb-item"><a href="/menu?category=<%= menuItem.category %>"><%= menuItem.category %></a></li>
+      <li class="breadcrumb-item active" aria-current="page"><%= menuItem.name %></li>
+    </ol>
+  </nav>
+
+  <!-- Item Details -->
+  <div class="row mb-5">
+    <div class="col-md-6 mb-4 mb-md-0">
+      <img src="<%= menuItem.image_url || '/images/default-pizza.jpg' %>" alt="<%= menuItem.name %>" class="img-fluid rounded shadow">
+    </div>
+    <div class="col-md-6">
+      <h1 class="mb-3"><%= menuItem.name %></h1>
+      <h4 class="text-primary mb-4">$<%= menuItem.price.toFixed(2) %></h4>
+      <p class="lead mb-4"><%= menuItem.description %></p>
+      
+      <% if (menuItem.available) { %>
+        <form id="addToCartForm">
+          <div class="mb-3">
+            <label for="quantity-<%= menuItem.id %>" class="form-label">Quantity</label>
+            <div class="input-group mb-3" style="max-width: 150px;">
+              <button class="btn btn-outline-secondary" type="button" id="decrease-qty">-</button>
+              <input type="number" class="form-control text-center" id="quantity-<%= menuItem.id %>" value="1" min="1" max="10">
+              <button class="btn btn-outline-secondary" type="button" id="increase-qty">+</button>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="notes-<%= menuItem.id %>" class="form-label">Special Instructions</label>
+            <textarea class="form-control" id="notes-<%= menuItem.id %>" rows="2" placeholder="Any special requests for this item? (optional)"></textarea>
+          </div>
+          
+          <button type="button" class="btn btn-lg btn-primary add-to-cart-btn" data-item-id="<%= menuItem.id %>">
+            <i class="fas fa-cart-plus me-2"></i> Add to Cart
+          </button>
+          <a href="/menu" class="btn btn-lg btn-outline-secondary ms-2">Continue Shopping</a>
+        </form>
+      <% } else { %>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          This item is currently unavailable. Please check back later.
+        </div>
+        <a href="/menu" class="btn btn-outline-primary">Back to Menu</a>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <% if (recommendations && recommendations.length > 0) { %>
+    <hr class="my-5">
+    <div class="row">
+      <div class="col-12">
+        <h3 class="mb-4">You might also like</h3>
+      </div>
+      
+      <% recommendations.forEach(function(item) { %>
+        <div class="col-md-6 col-lg-3 mb-4">
+          <div class="card h-100 shadow-sm">
+            <img src="<%= item.image_url || '/images/default-pizza.jpg' %>" class="card-img-top" alt="<%= item.name %>">
+            <div class="card-body">
+              <h5 class="card-title"><%= item.name %></h5>
+              <p class="card-text"><%= item.description %></p>
+              <p class="price">$<%= item.price.toFixed(2) %></p>
+            </div>
+            <div class="card-footer bg-white border-top-0 d-flex justify-content-between">
+              <a href="/menu/item/<%= item.id %>" class="btn btn-sm btn-outline-primary">View Details</a>
+              <% if (item.available) { %>
+                <button class="btn btn-sm btn-primary add-to-cart-btn" data-item-id="<%= item.id %>">
+                  <i class="fas fa-cart-plus"></i> Add
+                </button>
+              <% } else { %>
+                <button class="btn btn-sm btn-secondary" disabled>Unavailable</button>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<!-- Additional JavaScript for Quantity Controls -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const quantityInput = document.getElementById('quantity-<%= menuItem.id %>');
+  const decreaseBtn = document.getElementById('decrease-qty');
+  const increaseBtn = document.getElementById('increase-qty');
+  
+  if (quantityInput && decreaseBtn && increaseBtn) {
+    decreaseBtn.addEventListener('click', function() {
+      const currentValue = parseInt(quantityInput.value) || 1;
+      if (currentValue > 1) {
+        quantityInput.value = currentValue - 1;
+      }
+    });
+    
+    increaseBtn.addEventListener('click', function() {
+      const currentValue = parseInt(quantityInput.value) || 1;
+      if (currentValue < 10) {
+        quantityInput.value = currentValue + 1;
+      }
+    });
+    
+    quantityInput.addEventListener('change', function() {
+      const currentValue = parseInt(quantityInput.value);
+      if (isNaN(currentValue) || currentValue < 1) {
+        quantityInput.value = 1;
+      } else if (currentValue > 10) {
+        quantityInput.value = 10;
+      }
+    });
+  }
+});
+</script>
+
+<%- include('../partials/footer') %> 

@@ -1,0 +1,101 @@
+<%- include('../partials/header', { title: 'Employee Dashboard' }) %>
+
+<div class="container py-5">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
+      <div class="list-group shadow-sm">
+        <a href="/employee/dashboard" class="list-group-item list-group-item-action active">
+          <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+        </a>
+        <a href="/employee/orders" class="list-group-item list-group-item-action">
+          <i class="fas fa-list-alt me-2"></i> Orders
+        </a>
+        <% if (user.role === 'admin') { %>
+          <a href="/admin/menu" class="list-group-item list-group-item-action">
+            <i class="fas fa-pizza-slice me-2"></i> Manage Menu
+          </a>
+          <a href="/admin/users" class="list-group-item list-group-item-action">
+            <i class="fas fa-users me-2"></i> Manage Users
+          </a>
+        <% } %>
+        <a href="/" class="list-group-item list-group-item-action">
+          <i class="fas fa-home me-2"></i> Back to Site
+        </a>
+        <a href="/auth/logout" class="list-group-item list-group-item-action text-danger">
+          <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a>
+      </div>
+    </div>
+    
+    <!-- Dashboard Content -->
+    <div class="col-md-9">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Welcome, <%= user.name %></h4>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> You are logged in as an <%= user.role %>.
+          </div>
+          
+          <h5 class="mb-4">Quick Actions</h5>
+          
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">
+                    <i class="fas fa-list-alt text-primary me-2"></i> Orders
+                  </h5>
+                  <p class="card-text">View and manage customer orders</p>
+                  <a href="/employee/orders" class="btn btn-outline-primary">Manage Orders</a>
+                </div>
+              </div>
+            </div>
+            
+            <% if (user.role === 'admin') { %>
+              <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <i class="fas fa-pizza-slice text-primary me-2"></i> Menu Items
+                    </h5>
+                    <p class="card-text">Add, edit, or remove menu items</p>
+                    <a href="/admin/menu" class="btn btn-outline-primary">Manage Menu</a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <i class="fas fa-users text-primary me-2"></i> Users
+                    </h5>
+                    <p class="card-text">Manage user accounts and roles</p>
+                    <a href="/admin/users" class="btn btn-outline-primary">Manage Users</a>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+            
+            <div class="col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">
+                    <i class="fas fa-utensils text-primary me-2"></i> View Menu
+                  </h5>
+                  <p class="card-text">See what's on the menu today</p>
+                  <a href="/menu" class="btn btn-outline-primary">View Menu</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %> 
